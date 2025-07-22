@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
 import shutil
 from typing import Optional
@@ -20,22 +21,61 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware
+# CORS middleware - Allow all origins for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://frontend:3000"],
+    allow_origins=["*"],  # Allow all origins for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Constants - Use local path instead of Docker path
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+# Constants - Handle both local and production paths
+if os.getenv("RENDER"):
+    # Production on Render
+    UPLOAD_DIR = "/tmp/uploads"
+    STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "static")
+else:
+    # Local development
+    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    STATIC_DIR = None
+
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".txt"}
 
 # Create upload directory
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Mount static files for production (React build)
+if STATIC_DIR and os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    
+    @app.get("/")
+    async def serve_frontend():
+        """Serve React frontend"""
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        return {"message": "Resume Analyzer API", "docs": "/docs"}
+    
+    @app.get("/{path:path}")
+    async def serve_frontend_routes(path: str):
+        """Serve React frontend for all routes (SPA)"""
+        # Check if it's an API route
+        if path.startswith("api/") or path.startswith("docs") or path.startswith("redoc"):
+            raise HTTPException(status_code=404, detail="Not found")
+        
+        # Serve static files
+        file_path = os.path.join(STATIC_DIR, path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # Fallback to index.html for SPA routing
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        
+        return {"message": "Resume Analyzer API", "docs": "/docs"}
 
 def validate_file(file: UploadFile) -> bool:
     """Validate uploaded file"""
