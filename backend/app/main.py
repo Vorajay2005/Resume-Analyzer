@@ -128,7 +128,7 @@ def extract_text_from_file(file_path: str) -> str:
         return ""
 
 def get_nlp_analyzer():
-    """Get NLP analyzer - try advanced first, fallback to minimal"""
+    """Get NLP analyzer - try advanced first, fallback to simple"""
     try:
         from app.services.nlp_analyzer import NLPAnalyzer
         return NLPAnalyzer()
@@ -137,7 +137,11 @@ def get_nlp_analyzer():
             from app.services.nlp_analyzer_minimal import NLPAnalyzer
             return NLPAnalyzer()
         except ImportError:
-            return None
+            try:
+                from app.services.nlp_analyzer_simple import NLPAnalyzer
+                return NLPAnalyzer()
+            except ImportError:
+                return None
 
 def analyze_resume_match(resume_text: str, job_description: str) -> dict:
     """Analyze resume match against job description"""
