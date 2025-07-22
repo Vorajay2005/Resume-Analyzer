@@ -128,20 +128,13 @@ def extract_text_from_file(file_path: str) -> str:
         return ""
 
 def get_nlp_analyzer():
-    """Get NLP analyzer - try advanced first, fallback to simple"""
+    """Get NLP analyzer"""
     try:
         from app.services.nlp_analyzer import NLPAnalyzer
         return NLPAnalyzer()
-    except ImportError:
-        try:
-            from app.services.nlp_analyzer_minimal import NLPAnalyzer
-            return NLPAnalyzer()
-        except ImportError:
-            try:
-                from app.services.nlp_analyzer_simple import NLPAnalyzer
-                return NLPAnalyzer()
-            except ImportError:
-                return None
+    except ImportError as e:
+        logger.warning(f"Could not import NLP analyzer: {e}")
+        return None
 
 def analyze_resume_match(resume_text: str, job_description: str) -> dict:
     """Analyze resume match against job description"""
