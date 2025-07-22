@@ -127,10 +127,49 @@ def extract_text_from_file(file_path: str) -> str:
         logger.error(f"File extraction error: {e}")
         return ""
 
+def get_nlp_analyzer():
+    """Get NLP analyzer - try advanced first, fallback to minimal"""
+    try:
+        from app.services.nlp_analyzer import NLPAnalyzer
+        return NLPAnalyzer()
+    except ImportError:
+        try:
+            from app.services.nlp_analyzer_minimal import NLPAnalyzer
+            return NLPAnalyzer()
+        except ImportError:
+            return None
+
 def analyze_resume_match(resume_text: str, job_description: str) -> dict:
     """Analyze resume match against job description"""
     
-    # Simple keyword-based analysis (this would be enhanced with NLP in production)
+    # Try to use NLP analyzer, fallback to simple analysis
+    nlp_analyzer = get_nlp_analyzer()
+    
+    if nlp_analyzer:
+        try:
+            # Use advanced NLP analysis
+            similarity_score = nlp_analyzer.calculate_similarity(resume_text, job_description)
+            resume_skills = nlp_analyzer.extract_skills(resume_text)
+            job_skills = nlp_analyzer.extract_skills(job_description)
+            suggestions = nlp_analyzer.generate_improvement_suggestions(resume_text, job_description)
+            
+            return {
+                "overall_score": round(similarity_score, 1),
+                "skills_analysis": {
+                    "matched_skills": resume_skills["found"],
+                    "missing_skills": [skill for skill in job_skills["found"] if skill not in resume_skills["found"]][:10],
+                    "skills_score": round(similarity_score * 0.8, 1)  # Weight skills heavily
+                },
+                "experience_score": round(similarity_score * 0.9, 1),
+                "certification_score": round(similarity_score * 0.7, 1),
+                "suggestions": suggestions,
+                "analysis_method": "advanced_nlp"
+            }
+        except Exception as e:
+            logger.error(f"NLP analysis failed: {e}")
+            # Fall through to simple analysis
+    
+    # Simple keyword-based analysis (fallback)
     resume_lower = resume_text.lower()
     jd_lower = job_description.lower()
     
@@ -241,7 +280,8 @@ def analyze_resume_match(resume_text: str, job_description: str) -> dict:
             'matched': exp_score > 80,
             'required_years': 3,
             'found_years': 4
-        }
+        },
+        'analysis_method': 'simple_keyword'
     }
 
 @app.get("/health")
