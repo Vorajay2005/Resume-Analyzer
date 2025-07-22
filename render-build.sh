@@ -3,9 +3,13 @@
 echo "🚀 Starting Render Build Process..."
 echo "=================================="
 
-# Install Python dependencies
+# Upgrade pip and install build tools
+echo "🔧 Upgrading pip and installing build tools..."
+pip install --upgrade pip setuptools wheel
+
+# Install Python dependencies with optimizations
 echo "📦 Installing Python dependencies..."
-pip install -r backend/requirements.txt
+pip install --no-cache-dir --prefer-binary -r requirements-render.txt
 
 # Download spaCy model
 echo "🧠 Downloading spaCy English model..."
@@ -14,7 +18,7 @@ python -m spacy download en_core_web_sm
 # Install Node.js dependencies and build frontend
 echo "📦 Installing Node.js dependencies..."
 cd frontend
-npm ci
+npm ci --only=production
 
 echo "🏗️ Building React frontend..."
 npm run build
