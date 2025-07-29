@@ -4,12 +4,9 @@ import {
   Target,
   Brain,
   Award,
-  TrendingUp,
   AlertTriangle,
   CheckCircle,
   X,
-  ChevronDown,
-  ChevronRight,
   Star,
   Zap,
   FileText,
@@ -20,32 +17,12 @@ import { scoreUtils } from "../services/api";
 
 const AnalysisResults = ({ results }) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [expandedSections, setExpandedSections] = useState({
-    suggestions: true,
-    skills: true,
-    experience: true,
-    certifications: true,
-  });
-
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
 
   const getScoreColor = (score) => {
     if (score >= 85) return "text-success-600";
     if (score >= 70) return "text-primary-600";
     if (score >= 50) return "text-warning-600";
     return "text-danger-600";
-  };
-
-  const getScoreBackground = (score) => {
-    if (score >= 85) return "bg-success-500";
-    if (score >= 70) return "bg-primary-500";
-    if (score >= 50) return "bg-warning-500";
-    return "bg-danger-500";
   };
 
   const ScoreCircle = ({ score, label, size = "large" }) => {

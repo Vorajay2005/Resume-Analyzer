@@ -68,29 +68,29 @@ const Footer = () => {
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button className="hover:text-white transition-colors text-left">
                   How It Works
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button className="hover:text-white transition-colors text-left">
                   Privacy Policy
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button className="hover:text-white transition-colors text-left">
                   Terms of Service
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button className="hover:text-white transition-colors text-left">
                   FAQ
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button className="hover:text-white transition-colors text-left">
                   API Documentation
-                </a>
+                </button>
               </li>
             </ul>
           </div>
