@@ -60,49 +60,31 @@ export const apiService = {
     return response.data;
   },
 
-  // Upload resume file
-  async uploadResume(file) {
+  // Analyze resume file
+  async analyzeResume(file, jobDescription = "") {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("resume", file);
+    formData.append("job_description", jobDescription);
 
-    const response = await api.post("/api/upload-resume", formData);
+    const response = await api.post("/analyze", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
-  // Analyze resume and job description
+  // Legacy method for compatibility
   async analyzeMatch(resumeText, jobDescription, resumeFile = null) {
-    const formData = new FormData();
-    formData.append("resume_text", resumeText);
-    formData.append("job_description", jobDescription);
-
     if (resumeFile) {
-      formData.append("resume_file", resumeFile);
+      return this.analyzeResume(resumeFile, jobDescription);
     }
 
-    const response = await api.post("/api/analyze", formData);
-    return response.data;
-  },
-
-  // Analyze with file upload only
-  async analyzeWithFile(jobDescription, resumeFile) {
-    const formData = new FormData();
-    formData.append("job_description", jobDescription);
-    formData.append("resume_file", resumeFile);
-
-    const response = await api.post("/api/analyze-with-file", formData);
-    return response.data;
-  },
-
-  // Get supported skills
-  async getSupportedSkills() {
-    const response = await api.get("/api/skills");
-    return response.data;
-  },
-
-  // Get API stats
-  async getApiStats() {
-    const response = await api.get("/api/stats");
-    return response.data;
+    // If no file, create a text file
+    const textFile = new File([resumeText], "resume.txt", {
+      type: "text/plain",
+    });
+    return this.analyzeResume(textFile, jobDescription);
   },
 };
 
