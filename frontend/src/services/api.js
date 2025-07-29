@@ -60,8 +60,8 @@ export const apiService = {
     return response.data;
   },
 
-  // Analyze resume file
-  async analyzeResume(file, jobDescription = "") {
+  // Upload and analyze resume file
+  async uploadResume(file, jobDescription = "") {
     const formData = new FormData();
     formData.append("resume", file);
     formData.append("job_description", jobDescription);
@@ -74,17 +74,22 @@ export const apiService = {
     return response.data;
   },
 
+  // Alias for compatibility
+  async analyzeResume(file, jobDescription = "") {
+    return this.uploadResume(file, jobDescription);
+  },
+
   // Legacy method for compatibility
   async analyzeMatch(resumeText, jobDescription, resumeFile = null) {
     if (resumeFile) {
-      return this.analyzeResume(resumeFile, jobDescription);
+      return this.uploadResume(resumeFile, jobDescription);
     }
 
     // If no file, create a text file
     const textFile = new File([resumeText], "resume.txt", {
       type: "text/plain",
     });
-    return this.analyzeResume(textFile, jobDescription);
+    return this.uploadResume(textFile, jobDescription);
   },
 };
 

@@ -1,17 +1,18 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import os
 import re
 from typing import Optional
 from datetime import datetime
 import random
+import json
 
+# Create FastAPI app
 app = FastAPI(
     title="Resume Analyzer API",
     description="AI-powered resume analysis and job matching API",
-    version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    version="1.0.0"
 )
 
 # CORS middleware
@@ -123,6 +124,16 @@ def analyze_resume_simple(resume_text: str, job_description: str = "") -> dict:
         "word_count": len(resume_text.split())
     }
 
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "Resume Analyzer API", "status": "online"}
+
+@app.get("/api/")
+async def api_root():
+    """API root endpoint"""
+    return {"message": "Resume Analyzer API", "status": "online"}
+
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
@@ -170,25 +181,32 @@ async def analyze_resume(
         # Analyze resume
         analysis_result = analyze_resume_simple(resume_text, job_description or "")
         
-        return JSONResponse(content={
+        return {
             "success": True,
             "data": analysis_result,
             "message": "Resume analyzed successfully"
-        })
+        }
         
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
-@app.get("/api/")
-async def root():
-    """Root API endpoint"""
-    return {
-        "message": "Resume Analyzer API",
-        "version": "1.0.0",
-        "docs": "/api/docs"
-    }
+
+
+# Startup event to test the API
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Resume Analyzer API is starting up...")
+    print("✅ API endpoints available:")
+    print("   - GET  /api/health")
+    print("   - POST /api/analyze") 
+    print("   - GET  /")
 
 # Export for Vercel
 handler = app
+
+# For testing locally
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
