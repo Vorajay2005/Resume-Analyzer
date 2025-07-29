@@ -2,7 +2,7 @@
   "name": "resume-analyzer",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd frontend && npm ci && npm run build && cp -r build ../build",
+    "build": "cd frontend && npm ci && npm run build && cp -r build ../",
     "start": "cd frontend && npm start"
   }
 }
