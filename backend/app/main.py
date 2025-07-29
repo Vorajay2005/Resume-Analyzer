@@ -291,7 +291,7 @@ async def health_check():
         "version": "1.0.0"
     }
 
-@app.post("/api/upload-resume")
+@app.post("/upload-resume")
 async def upload_resume(file: UploadFile = File(...)):
     """Upload and parse resume file"""
     try:
@@ -350,7 +350,7 @@ async def upload_resume(file: UploadFile = File(...)):
             detail="An error occurred while processing the file."
         )
 
-@app.post("/api/analyze")
+@app.post("/analyze")
 async def analyze_resume(
     resume_text: str = Form(...),
     job_description: str = Form(...),
@@ -409,7 +409,7 @@ async def analyze_resume(
             detail="An error occurred during analysis."
         )
 
-@app.post("/api/analyze-with-file")
+@app.post("/analyze-with-file")
 async def analyze_with_file(
     job_description: str = Form(...),
     resume_file: UploadFile = File(...)
@@ -459,7 +459,7 @@ async def analyze_with_file(
             detail="An error occurred during file analysis."
         )
 
-@app.get("/api/skills")
+@app.get("/skills")
 async def get_supported_skills():
     """Get list of supported skills"""
     skills = {
@@ -481,7 +481,7 @@ async def get_supported_skills():
     }
     return skills
 
-@app.get("/api/stats")
+@app.get("/stats")
 async def get_api_stats():
     """Get API usage statistics"""
     return {
